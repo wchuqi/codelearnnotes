@@ -350,6 +350,294 @@ p.s:奇怪，为啥命令在cmd里不打印。。。
 
 
 
+## 字典和集合
+
+字典是一系列由键（key）和值（value）配对组成的
+元素的集合，在 Python3.7+，字典被确定为有序（注意：在 3.6 中，字典有序是一个implementation detail，在 3.7 才正式成为语言特性，因此 3.6 中无法 100% 确保其有序性），而 3.6 之前是无序的，其长度大小可变，元素可以任意地删减和改变。
+
+相比于列表和元组，字典的性能更优，特别是对于查找、添加和删除操作，字典都能在常数时间复杂度内完成。
+
+字典和集合，无论是键还是值，都可以是混合类型。
+
+而集合和字典基本相同，唯一的区别，就是集合没有键和值的配对，是一系列无序的、唯一的元素组合。
+
+
+
+### 字典和集合的创建
+
+通常有下面这几种方式：
+
+```python
+d1 = {'name': 'jason', 'age': 20, 'gender': 'male'}
+d2 = dict({'name': 'jason', 'age': 20, 'gender': 'male'})
+d3 = dict([('name', 'jason'), ('age', 20), ('gender', 'male')])
+d4 = dict(name='jason', age=20, gender='male')
+d1 == d2 == d3 ==d4
+True
+
+s1 = {1, 2, 3}
+s2 = set([1, 2, 3])
+s1 == s2
+True
+```
+
+### 元素访问
+
+字典访问可以直接索引键，如果不存在，就会抛出异常。
+
+使用 get(key, default) 函数来进行索引。如果键不存在，调用 get() 函数可以返回一个默认值。
+
+```python
+d = {'name': 'jason', 'age': 20}
+d['name']
+'jason'
+
+d['location']
+Traceback (most recent call last):
+File "<stdin>", line 1, in <module>
+KeyError: 'location'
+
+d = {'name': 'jason', 'age': 20}
+d.get('name')
+'jason'
+d.get('location', 'null')
+'null'
+```
+
+集合并不支持索引操作，因为集合本质上是一个哈希表，和列表不一样。
+
+```python
+s = {1, 2, 3}
+s[0]
+Traceback (most recent call last):
+File "<stdin>", line 1, in <module>
+TypeError: 'set' object does not support indexing
+```
+
+判断一个元素在不在字典或集合内，可以用 value in dict/set 来判断。
+
+```python
+s = {1, 2, 3}
+1 in s
+True
+10 in s
+False
+
+d = {'name': 'jason', 'age': 20}
+'name' in d
+True
+'location' in d
+False
+```
+
+### 元素修改
+
+增加、删除、更新等操作
+
+```python
+d = {'name': 'jason', 'age': 20}
+d['gender'] = 'male' # 增加元素对'gender': 'male'
+d['dob'] = '1999-02-01' # 增加元素对'dob': '1999-02-01'
+d
+{'name': 'jason', 'age': 20, 'gender': 'male', 'dob': '1999-02-01'}
+
+d['dob'] = '1998-01-01' # 更新键'dob'对应的值
+d.pop('dob') # 删除键为'dob'的元素对
+'1998-01-01'
+d
+{'name': 'jason', 'age': 20, 'gender': 'male'}
+
+s = {1, 2, 3}
+s.add(4) # 增加元素 4 到集合
+s
+{1, 2, 3, 4}
+s.remove(4) # 从集合中删除元素 4
+s
+{1, 2, 3}
+```
+
+注意，集合的 pop() 操作是删除集合中最后一个元素，可是集合本身是无序的，你无法知道会删除哪个元素，因此这个操作得谨慎使用。
+
+
+
+### 排序
+
+```python
+d = {'b': 1, 'a': 2, 'c': 10}
+d_sorted_by_key = sorted(d.items(), key=lambda x: x[0]) # 根据字典键的升序排序
+d_sorted_by_value = sorted(d.items(), key=lambda x: x[1]) # 根据字典值的升序排序
+
+# 这里返回了一个列表。列表中的每个元素，是由原字典的键和值组成的元组。
+d_sorted_by_key
+[('a', 2), ('b', 1), ('c', 10)]
+
+d_sorted_by_value
+[('b', 1), ('a', 2), ('c', 10)]
+
+# 对于集合，其排序和列表、元组很类似，直接调用 sorted(set) 即可，结果会返回一个排好序的列表。
+s = {3, 4, 2, 1}
+sorted(s) # 对集合的元素进行升序排序
+[1, 2, 3, 4]
+```
+
+### 字典和集合性能
+
+```python
+import time
+
+id = [x for x in range(0, 100000)]
+price = [x for x in range(200000, 300000)]
+products = list(zip(id, price))
+
+# list version
+def find_unique_price_using_list(products):
+    unique_price_list = []
+    for _, price in products: # A
+        if price not in unique_price_list: #B
+            unique_price_list.append(price)
+    return len(unique_price_list)
+
+# 计算列表版本的时间
+start_using_list = time.perf_counter()
+find_unique_price_using_list(products)
+end_using_list = time.perf_counter()
+print("time elapse using list: {}".format(end_using_list - start_using_list))
+## 输出
+time elapse using list: 41.61519479751587
+
+# set version
+def find_unique_price_using_set(products):
+    unique_price_set = set()
+    for _, price in products:
+        unique_price_set.add(price)
+    return len(unique_price_set)
+
+# 计算集合版本的时间
+start_using_set = time.perf_counter()
+find_unique_price_using_set(products)
+end_using_set = time.perf_counter()
+print("time elapse using set: {}".format(end_using_set - start_using_set))
+# 输出
+time elapse using set: 0.008238077163696289
+```
+
+
+
+### 字典和集合的工作原理
+
+这当然和字典、集合内部的数据结构密不可分。不同于其他数据结构，字典和集合的内部结构都是一张哈希表。
+
+对于字典而言，这张表存储了哈希值（hash）、键和值这 3 个元素。
+而对集合来说，区别就是哈希表内没有键和值的配对，只有单一的元素了。
+
+
+
+老版本 Python 的哈希表结构如下所示：
+
+```python
+--+-------------------------------+
+| 哈希值 (hash) 键 (key) 值 (value)
+--+-------------------------------+
+0 | hash0 key0 value0
+--+-------------------------------+
+1 | hash1 key1 value1
+--+-------------------------------+
+2 | hash2 key2 value2
+--+-------------------------------+
+. | ...
+__+_______________________________+
+```
+
+不难想象，随着哈希表的扩张，它会变得越来越稀疏。
+
+哈希表为了保证其操作的有效性（查找，添加，删除等等），都会overallocate（保留至少1/3的剩余空间），但是很多空间其实都没有被利用，因此很稀疏。
+
+举个例子，有个字典
+
+```python
+{'name': 'mike', 'dob': '1999-01-01', 'gender': 'male'}
+会存储为类似下面的形式:
+entries = [
+['--', '--', '--']
+[-230273521, 'dob', '1999-01-01'],
+['--', '--', '--'],
+['--', '--', '--'],
+[1231236123, 'name', 'mike'],
+['--', '--', '--'],
+[9371539127, 'gender', 'male']
+]
+
+这样的设计结构显然非常浪费存储空间。为了提高存储空间的利用率，现在的哈希表除了字典本身的结构，会把索引和哈希值、键、值单独分开，也就是下面这样新的结构：
+Indices
+----------------------------------------------------
+None | index | None | None | index | None | index ...
+----------------------------------------------------
+
+Entries
+--------------------
+hash0 key0 value0
+---------------------
+hash1 key1 value1
+---------------------
+hash2 key2 value2
+---------------------
+...
+---------------------
+
+那么，刚刚的这个例子，在新的哈希表结构下的存储形式，就会变成下面这样：
+indices = [None, 1, None, None, 0, None, 2]
+entries = [
+[1231236123, 'name', 'mike'],
+[-230273521, 'dob', '1999-01-01'],
+[9371539127, 'gender', 'male']
+]
+可以很清晰地看到，空间利用率得到很大的提高。
+```
+
+
+
+**插入操作**
+每次向字典或集合插入一个元素时，Python 会首先计算键的哈希值（hash(key)），再和mask = PyDicMinSize - 1 做与操作，计算这个元素应该插入哈希表的位置 index =hash(key) & mask。
+
+如果哈希表中此位置是空的，那么这个元素就会被插入其中。
+
+而如果此位置已被占用，Python 便会比较两个元素的哈希值和键是否相等。
+
+若两者都相等，则表明这个元素已经存在，如果值不同，则更新值。
+若两者中有一个不相等，这种情况我们通常称为哈希冲突（hash collision），意思是两个元素的键不相等，但是哈希值相等。这种情况下，Python 便会继续寻找表中空余的位置，直到找到位置为止。
+
+值得一提的是，通常来说，遇到这种情况，最简单的方式是线性寻找，即从这个位置开始，挨个往后寻找空位。当然，Python 内部对此进行了优化（这一点无需深入了解，你有兴趣可以查看源码，我就不再赘述），让这个步骤更加高效。
+
+
+
+**查找操作**
+和前面的插入操作类似，Python 会根据哈希值，找到其应该处于的位置；然后，比较哈希表这个位置中元素的哈希值和键，与需要查找的元素是否相等。如果相等，则直接返回；如果不等，则继续查找，直到找到空位或者抛出异常为止。
+
+**删除操作**
+对于删除操作，Python 会暂时对这个位置的元素，赋于一个特殊的值，等到重新调整哈希表的大小时，再将其删除。
+
+不难理解，哈希冲突的发生，往往会降低字典和集合操作的速度。
+
+因此，为了保证其高效性，字典和集合内的哈希表，通常会保证其至少留有 1/3 的剩余空间。随着元素的不停插入，当剩余空间小于 1/3 时，Python 会重新获取更大的内存空间，扩充哈希表。不过，这种情况下，表内所有的元素位置都会被重新排放。
+
+虽然哈希冲突和哈希表大小的调整，都会导致速度减缓，但是这种情况发生的次数极少。所以，平均情况下，这仍能保证插入、查找和删除的时间复杂度为 O(1)。
+
+
+
+
+
+
+
+# 模块
+
+## dis
+
+Python 字节码反汇编器
+
+https://docs.python.org/zh-cn/3.12/library/dis.html
+
+#todo
+
 
 
 # 参考
