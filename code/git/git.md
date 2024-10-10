@@ -317,3 +317,225 @@ git diff HEAD HEAD^^
 git diff HEAD HEAD~2
 ```
 
+
+
+## 常用操作
+
+### 删除不需要的分支
+
+```shell
+git branch -av
+gitk --all
+
+# 删除分支
+git branch -d 分支名称
+git branch -D 分支名称
+
+```
+
+
+
+### 修改最新commit的message
+
+```shell
+git commit --amend
+:wq!
+```
+
+### 修改旧commit的message
+
+```shell
+c2
+c1
+c0
+
+如何修改c1?
+
+git rebase -i c0
+pick c2
+r c1
+pick c0
+...
+:wq!
+
+# r, reward <commit> = use commit, but edit the commit message
+```
+
+注意：
+
+已经提交到远程仓库的commit就不要随意`变基 rebase`了。
+
+### 把连续的多个commit整理成一个
+
+```shell
+c3
+c2
+c1
+c0
+
+如何合并c1和c2
+
+git rebase -i c0
+pick c3
+s c2
+s c1
+pick c0
+:wq!
+
+# s, squash <commit> = use commit, but meld into previous commit.
+```
+
+### 把间隔的几个commit整理成一个
+
+```shell
+git log --graph
+c3
+c2
+c1
+c0
+
+如何把c1和c3合并
+
+git rebase -i c0
+pick c3
+s c1
+pick c2
+pick c0
+:wq!
+
+git rebase --continue
+
+```
+
+### 比较暂存区和HEAD所含文件的差异
+
+```shell
+git diff --cached
+```
+
+### 比较工作区和暂存区所含文件的差异
+
+```shell
+git diff
+git diff -- 文件名1
+git diff -- 目录1/文件名2
+git diff -- 文件名1 文件名3
+```
+
+### 让暂存区恢复成和HEAD一样
+
+```shell
+git status
+
+use "git reset HEAD <file>..." to unstage 
+
+git reset HEAD
+git status
+
+# 恢复部分文件
+git reset HEAD -- 文件1
+git reset HEAD -- 文件1 文件2
+git reset HEAD -- 目录1/文件3
+```
+
+### 让工作区恢复成和暂存区一样
+
+```shell
+git status
+
+use "git checkout -- <file>..." to discard changes in working directory
+```
+
+### 消除最近的几次提交（回退）
+
+```shell
+c4
+c3
+c2
+c1
+c0
+
+回退到c2
+
+git reset --hard c2
+
+# 回退所有工作区和暂存区的修改
+git reset --hard
+```
+
+### 查看不同提交的指定文件的差异
+
+```shell
+git diff dev master
+
+git diff dev master -- 文件1
+
+git diff commit1 commit2 -- 文件1
+```
+
+### 删除文件
+
+```shell
+# 方式1
+rm file1
+git add file1
+git status
+deleted file1
+
+# 方式2
+git rm file1
+git status
+deleted file1
+```
+
+### 工作区缓存(stash)
+
+```shell
+# 把工作区的内容临时缓存起来
+git stash
+git status
+
+git stash list
+
+# 使用缓存到工作区，但是不删除
+git stash apply
+git stash list
+
+# 使用缓存到工作区，同时删除缓存
+git stash pop
+git stash list
+
+git stash pop stash@{0}
+git stash list
+```
+
+### 指定不需要git管理的文件（ignore）
+
+```shell
+vi .gitignore
+```
+
+### 将git仓库备份到本地
+
+常用的传输协议
+
+<img src="images/image-20241010234534666.png" alt="image-20241010234534666" style="zoom:70%;" />
+
+直观区别：哑协议传输进度不可见；智能协议传输可见。
+传输速度：智能协议比哑协议传输速度快。
+
+<img src="images/image-20241010234950727.png" alt="image-20241010234950727" style="zoom:50%;" />
+
+这个图有一种美感！！
+
+```shell
+git clone /path/a/b/c/.git aaa.git
+git clone files:///path/a/b/c/.git bbb.git
+
+git remote -v
+git remote add aaa /path/a/b/c/.git
+git remote add bbb files:///path/a/b/c/.git
+
+git push --set-upstream aaa master
+```
+
