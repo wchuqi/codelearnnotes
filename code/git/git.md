@@ -94,6 +94,8 @@ git config --list --global
 git config --list --system
 
 git config --local user.name
+
+git config --local -l
 ```
 
         建Git仓库
@@ -537,5 +539,60 @@ git remote add aaa /path/a/b/c/.git
 git remote add bbb files:///path/a/b/c/.git
 
 git push --set-upstream aaa master
+```
+
+
+
+## Github使用
+
+```shell
+ls ~/.ssh
+
+ssh-keygen -t rsa -b 4096 -C "your email"
+ls ~/.ssh
+id_rsa
+id_rsa.pub
+
+pbcopy < ~/.ssh/id_rsa.pub
+
+git remote add github_1 ssh@xxxxxxx
+git remote remove <name>
+git remote rename <old> <new>
+
+# 把本地所有分支都push到远端仓库
+git push github_1 --all
+
+# git pull = git fetch + merge
+git pull
+
+git fetch github_1 master
+git checkout master
+git merge github_1/master
+报错：fatal: refusing to merge unrelated histories
+git merge --allow-unrelated-histories github_1/master
+# 然后可以push到远端了
+git push github_1 master
+```
+
+## 多人协作
+
+```shell
+git clone -b master git_url <name>
+
+cd <name>
+git config --add --local user.name "xxx"
+
+```
+
+## 危险操作
+
+**禁止向集成分支执行push -f操作**
+
+**禁止向集成分支执行变更历史的操作（rebase）**
+
+```shell
+git push --force
+git push -f
+
 ```
 
