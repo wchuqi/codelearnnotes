@@ -596,3 +596,107 @@ git push -f
 
 ```
 
+## Github
+
+成功的因素：
+
+1、找到一个需要解决的大问题
+
+让Git更容易使用是GitHub的目标，但这并不是最终目标。
+
+GitHub真正的愿景是使协作和编写软件更容易。
+
+2、不断解决用户痛点
+
+公司不仅致力于解决疑难问题，而且还致力于解决所有软件开发人员遇到的痛苦问题。
+
+开发者需要一个更好、更直观的版本控制系统，它具有解决人类问题的巨大潜力，即轻松、安全和远程协作软件项目。
+
+
+
+### 高级搜索
+
+Advanced search
+
+![image-20241016232339903](images/image-20241016232339903.png)
+
+`rust in:readme stars:>1000 language:Go`
+
+https://docs.github.com/en/search-github/github-code-search/understanding-github-code-search-syntax
+
+
+
+## 组织
+
+项目组成员
+
+权限控制
+
+Admin、Write、Read
+
+
+
+## 开发模式
+
+1、主干分支开发
+
+<img src="images/image-20241016234321937.png" alt="image-20241016234321937" style="zoom: 50%;" />
+
+2、Git Flow
+
+<img src="images/image-20241016234405020.png" alt="image-20241016234405020" style="zoom: 67%;" />
+
+3、Github Flow
+
+<img src="images/image-20241016234519873.png" alt="image-20241016234519873" style="zoom:50%;" />
+
+4、Gitlab Flow
+
+**生产分支发布**
+
+![image-20241016234952203](images/image-20241016234952203.png)
+
+
+
+**不同环境分支发布**
+
+<img src="images/image-20241016234838704.png" alt="image-20241016234838704" style="zoom:50%;" />
+
+**不同发布分支**
+
+<img src="images/image-20241016234759116.png" alt="image-20241016234759116" style="zoom:50%;" />
+
+## 启用issue跟踪需求和任务
+
+issue单
+
+创建dashboard
+
+code review
+
+通过CI发布release包
+
+github wiki
+
+
+
+## GitLab
+
+开源
+
+强大的CI集成
+
+Ruby开发。
+
+
+
+应用部署到AWS上
+
+
+
+# 参考
+
+《玩转Git三剑客》极客时间
+
+
+
