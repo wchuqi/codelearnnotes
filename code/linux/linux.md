@@ -1381,7 +1381,153 @@ reboot
 
 # 软件安装
 
+## 软件包管理器
 
+包管理器是方便软件安装、卸载，解决软件依赖关系的重要工具。
+Centos、RedHat使用yum包管理器，软件安装包格式为rpm。
+Debian、 Ubuntu使用apt包管理器，软件安装包格式为deb。
+
+
+
+## rpm包和rpm命令
+
+```shell
+# rpm包格式
+vim-common-7.4.10-5.el7.×86_64.rpm
+vim-common 软件名称 
+7.4.10-5   软件版本 
+el7        系统版本 
+x86_64     平台
+```
+
+```shell
+# rpm命令
+rpm命令常用参数
+-q 查询软件包
+-i 安装软件包
+-e 卸载软件包
+
+rpm -qa | more
+rmp -q vim-common
+```
+
+
+
+## yum仓库
+
+```shell
+# rpm包的问题
+# 需要自己解决依赖关系
+# 软件包来源不可靠
+Centos yum源
+http://mirror.centos.org/centos/7/
+# 国内镜像
+https://opsx.alibaba.com/mirror
+```
+
+```shell
+# yum配置文件
+vim /etc/yum.repos.d/centos-Base.repo
+[base]
+name=CentoS-$releasever - Base - mirrors.aliyun.com
+failovermethod=priority
+baseurl=http://mirrors.aliyun.com/centos/$releasever/os/$basearch/
+		http://mirrors.aliyuncs.com/centos/$releasever/os/$basearch/
+		http://mirrors.cloud.aliyuncs.com/centos/$releasever/os/$basearch/
+gpgcheck=1
+gpgkey=http://mirrors.aliyun.com/centos/RPM-GPG-KEY-CentoS-7
+
+wget -O /etc/yum.repos.d/centos-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
+```
+
+```shell
+# yum命令
+
+# 常用选项
+install 安装软件包
+remove 卸载软件包
+list|grouplist 查看软件包
+update 升级软件包
+
+yum makecache
+```
+
+
+
+
+
+## 源代码编译安装
+
+```shell
+# 源码方式安装
+# 二进制安装
+
+# 源代码编译安装
+wget https://openresty.org/download/openresty-1.15.8.1.tar.gz
+tar -zxf openresty-VERSION.tar.gz
+cd openresty-VERSION/
+./configure --prefix=/usr/local/openresty
+make -j2
+make install
+
+yum install gcc gcc-c++
+yum install pcre-devel
+yum install openssl-devel -y
+
+gmake -j2
+gmake install
+```
+
+
+
+## 内核升级
+
+```shell
+# rpm格式内核
+
+# 查看内核版本
+uname -r
+
+# 升级内核版本
+yum install kernel-3.10.0
+# 升级已安装的其他软件包和补丁
+yum update
+
+# 源码编译方式安装内核
+# 安装依赖包
+yum install gcc gcc-c++ make ncurses-devel openssl-devel elfutils-libelf-devel
+# 下载并解压缩内核
+https://www.kernel.org
+tar xvf linux-5.1..10.tar.×Z -C /usr/src/kernels
+# 配置内核编译参数
+cd /usr/src/kernels/linux-5.1.10/
+make menuconfig | allyesconfig | allnoconfig
+# 使用当前系统内核配置
+cp /boot/config-kernelversion.platform /usr/src/kernels/linux-5.1.10/.config
+# 查看CPU
+lscpu
+# 编译
+make -j2 all
+# 安装内核
+make modules_install
+make install
+
+# 编译内核至少需要10g的磁盘
+```
+
+
+
+```shell
+yum install epel-release -y
+yum install kernel
+yum install kernel-3.10.0
+```
+
+
+
+
+
+grub配置文件
 
 
 
