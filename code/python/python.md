@@ -42,6 +42,22 @@
 
 
 
+总结：
+
+从工程的角度去学习一门语言。（实际工程需求场景的落地）
+
+不同语言，需要融会贯通
+
+>先看下基础语法，理解语言中的重难点、易错点，然后动手完成一个项目，达到融会贯通。
+
+牢牢掌握一门编程语言及其学习方法，是日后在其它所有领域深造的根基。
+
+
+
+**A picture is worth a thousand words**
+
+
+
 编程语言的学习重点，总结成了下面这三步：
 
 1、大厦之基，勤加练习
@@ -60,10 +76,35 @@
 
 https://jupyter.org/
 
+
+
+其它参考：
+
+https://colab.research.google.com/notebooks/welcome.ipynb
+
+https://jupyter.org/install
+https://mybinder.readthedocs.io/en/latest/introduction.html
+https://mp.weixin.qq.com/s/fpWtJAOb_Uz5ApndtXAlyw
+
+
+
 Jupyter本地的两种安装办法：
 1、安装Anconda。Anconda包含科学计算的几乎所有包，包含jupyter。
 2、仅安装了Python。可以`pip install ipython, jupyter`
 命令行启动`jupyter：jupyter notebook`
+
+
+
+设置pip镜像源：
+
+```shell
+pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+pip config set install.trusted-host mirrors.aliyun.com
+```
+
+参考：https://zhuanlan.zhihu.com/p/106697938
+
+
 
 
 

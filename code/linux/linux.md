@@ -24,13 +24,17 @@ Fedora
 
 Euler
 
-CentOS （Community Enterprise Operating System）
+CentOS （Community Enterprise Operating System）(基于redhat)
 
 2个图形化桌面系统：
 
 Ubuntu
 
 Debian
+
+
+
+**linux系统中“万物皆文件”。**
 
 
 
@@ -67,6 +71,23 @@ https://mirrors.aliyun.com/centos/7/isos/x86_64/
 6：系统重启
 
 常用运行级别是3和5，也可以指定默认运行级别。
+
+
+
+```shell
+# 非图形化登录系统
+init 3
+# 退出登录
+exit
+
+# 关机
+init 0
+
+# 切换用户
+su - root
+```
+
+
 
 
 
@@ -162,7 +183,11 @@ graphical.target
 man ls
 
 # man 也是一条命令，分为9章，可以使用man命令获得 man的帮助
-man 7 man
+man 7 man # 获取第7章帮助
+man 1 ls  # 获取第1章帮助
+man 1 passwd
+man 5 passwd
+man -a passwd
 
 # 通过关键字搜索
 man -a passwd
@@ -194,8 +219,6 @@ ls is aliased to `ls --color=auto'
 # info帮助比help更详细，作为help的补充
 info ls
 ```
-
-**一切皆文件**
 
 ### 文件和目录的操作
 
@@ -1065,6 +1088,24 @@ SElinux是负责Linux系统安全的，但是启用它后会变得很麻烦，�
 https://www.redhat.com/zh/topics/linux/what-is-selinux
 
 ```shell
+MAC（强制访问控制）与DAC（自主访问控制）
+
+查看SELinux的命令
+getenforce
+/usr/sbin/sestatus
+
+pS -Z and ls -Z and id -Z
+
+关闭SELinux
+setenforce 0
+/etc/selinux/sysconfig
+```
+
+
+
+
+
+```shell
 # 查看Linux的Selinux状态命令：
 sestatus
 
@@ -1527,7 +1568,245 @@ yum install kernel-3.10.0
 
 
 
-grub配置文件
+## grub配置文件
+
+```shell
+# grub是什么
+
+# grub配置文件
+/etc/default/grub
+/etc/grub.d/
+/boot/grub2/grub.cfg
+
+grub2-mkconfig -o /boot/grub2/grub.cfg  
+
+# 使用单用户进入系统（忘记root密码）
+ls /sysroot
+mount -o remount,rw /sysroot
+chroot /sysroot
+ls /
+echo 新密码 | passwd --stdin root
+```
+
+
+
+```shell
+# 查看引导内核
+[root@localhost tmp]# grub2-editenv list
+saved_entry=CentOS Linux (3.10.0-1160.el7.x86_64) 7 (Core)
+
+# 查看引导内核
+grep ^menu /boot/grub2/grub.cfg
+
+# 修改默认引导内核
+grub2-set-default 0
+grub2-set-default 1
+grub2-set-default 2
+
+reboot
+```
+
+
+
+# 进程管理
+
+## 进程的概念与进程查看
+
+进程
+
+> 运行中的程序，从程序开始运行到终止的整个生命周期是可管理的。
+>
+> C程序的启动是从main函数开始的
+> `int main(int agrc，char *argv）`
+>
+> 终止的方式并不唯一，分为正常终止和异常终止。
+> 正常终止也分为从main返回、调用exit等方式。
+> 异常终止分为调用abort、接收信号等。
+
+
+
+```shell
+# 查看命令
+ps
+pstree
+top
+
+1、进程也是树形结构
+2、进程和权限有着密不可分的关系
+```
+
+```shell
+man ps
+ps -ef | more
+ps -eLf # 显示thread
+
+pstree | more
+```
+
+top命令使用
+
+#todo#
+
+
+
+## 进程的控制命令
+
+```shell
+# 调整进程优先级
+nice 范围从-20到19，值越小优先级越高，抢占资源就越多
+renice 重新设置优先级
+
+# 进程的作业控制
+jobs
+& 符号
+```
+
+
+
+```shell
+vim a.sh
+#!/bin/bash
+echo $$ # 打印当前进程pid
+# 死循环
+while :
+do
+	:
+done
+:wq!
+
+chmod u+x a.sh
+./a.sh
+ctrl + z # 进程后台临时挂起，不再执行，状态是stopped
+
+./a.sh &  # 后台执行
+jobs # 查询后台执行的进程
+fg 1 # 把编号是1的后台进程调用到前台执行
+bg 1 # 把编号是1的进程调用到后台执行
+
+# 查询指定进程
+top -p 进程pid
+
+# 设置优先级
+nice -n 10 ./a.sh
+renice -n 15 进程pid
+```
+
+
+
+
+
+## 进程的通信方式：信号
+
+```shell
+# 信号是进程间通信方式之一，典型用法是：终端用户输入中断命令，通过信号机制停止一个程序的运行。
+
+使用信号的常用快捷键和命令
+# 查看所有信号
+kill -l
+
+SIGINT  通知前台进程组终止进程  等价 ctrl+ C
+SIGKILL 立即结束程序，不能被阻塞和处理 等价 kill -9 pid
+```
+
+
+
+
+
+## 守护进程和系统日志
+
+使用 `nohup` 与 `&` 符号配合运行一个命令
+
+```shell
+tail -f /var/log/messages
+```
+
+
+
+
+
+`nohup`命令使进程忽略`hangup`（挂起）信号
+
+
+
+守护进程（`daemon`）和一般进程有什么差别呢？
+
+
+
+## screen
+
+```shell
+# 安装
+yum install screen
+
+# 运行
+screen
+tail -f /var/log/messages
+ctrl + a
+
+screen -ls
+screen -r xxxxx
+
+# 系统日志
+/var/log/messages
+# 内核启动日志
+/var/log/dmesg
+# 安全日志
+/var/log/secure
+# 计划任务日志
+/var/log/cron
+```
+
+
+
+使用`screen`命令
+`screen`进入`screen`环境
+`ctrl+a d` 退出（`detached`）`screen`环境
+`screen -ls`查看`screen`的会话
+`screen -r sessionid`恢复会话
+
+
+
+## 服务管理工具systemctl
+
+```shell
+# 服务（提供常见功能的守护进程）集中管理工具
+service
+systemctl
+```
+
+```shell
+# service的启动脚本
+cd /etc/init.d/
+vim network
+
+# systemd
+cd /usr/lib/systemd/system
+vim sshd.service
+
+# systemctl常见操作
+systemctl start|stop|restart|reload|enable|disable 服务名称
+
+# 软件包安装的服务单元 
+/usr/lib/systemd/system/
+
+# 查看服务级别
+[root@localhost tmp]# cd /usr/lib/systemd/system
+[root@localhost system]# ls -l runlevel*.target
+lrwxrwxrwx. 1 root root 15 Oct 20 08:39 runlevel0.target -> poweroff.target
+lrwxrwxrwx. 1 root root 13 Oct 20 08:39 runlevel1.target -> rescue.target
+lrwxrwxrwx. 1 root root 17 Oct 20 08:39 runlevel2.target -> multi-user.target
+lrwxrwxrwx. 1 root root 17 Oct 20 08:39 runlevel3.target -> multi-user.target
+lrwxrwxrwx. 1 root root 17 Oct 20 08:39 runlevel4.target -> multi-user.target
+lrwxrwxrwx. 1 root root 16 Oct 20 08:39 runlevel5.target -> graphical.target
+lrwxrwxrwx. 1 root root 13 Oct 20 08:39 runlevel6.target -> reboot.target
+[root@localhost system]#
+```
+
+
+
+
+
+SELinux简介
 
 
 
