@@ -1804,9 +1804,132 @@ lrwxrwxrwx. 1 root root 13 Oct 20 08:39 runlevel6.target -> reboot.target
 
 
 
+# 内存和磁盘管理
+
+## 内存和磁盘使用率查看
+
+```shell
+# 查看内存常用命令
+free
+top
+
+# 查看磁盘
+fdisk
+df
+du
+
+du和ls的区别
+du计算的是真实占用的磁盘大小
+```
 
 
-SELinux简介
+
+```shell
+free -g
+free -m
+```
+
+```shell
+# 查看磁盘
+fdisk -l
+或者
+parted -l
+
+ls -l /dev/sd?
+ls -l /dev/sd??
+
+# 创建一个指定大小的空文件
+dd if=/dev/zero bs=4M count=10 of=afile # 创建40m大小的afile文件
+ls -lh afile
+40m
+du -h afile
+40m
+
+dd if=/dev/zero bs=4M count=10 seek=20 of=afile # 创建40m大小的afile文件，每次跳过20个4m
+ls -lh afile
+120m
+du -h afile
+40m
+```
+
+## ext4文件系统
+
+```shell
+Linux支持多种文件系统，常见的有:
+ext4
+xfs
+NTFS（需安装额外软件）
+```
+
+```shell
+ext4文件系统基本结构比较复杂
+超级块
+超级块副本
+i节点（inode）
+数据块（datablock）
+
+自己理解：
+i节点记录的是文件的信息
+数据块记录的是实际数据
+i节点指向多个数据块，节点链的方式组织数据。
+超级块里存的是文件的统计信息
+超级块副本存的是数据的备份
+ls统计的是i节点里的信息
+du统计的是数据块
+
+# 查看文件对应的i节点
+ls -i
+```
+
+
+
+```shell
+# i节点和数据块的操作
+touch afile
+ls -li afile
+0k
+du -h afile
+0k
+
+echo 123 > afile
+ls -li afile
+4k
+du -h afile
+4k
+
+在文件所在的父目录上mv移动文件时，文件的i节点值不会变。
+mv到不同父目录时，i节点值发生改变。
+
+mv执行很快，哪怕是几百G的文件，也能瞬间完成。
+原理就是只需要修改i节点的值，不用修改数据块。
+
+ln是不能跨文件系统操作的。
+vim afile # 会修改文件的i节点值，是因为vim操作会形成一个新的文件 afile.swap
+echo afile # 不会修改i节点值
+
+rm afile # 只是断开i节点和数据块的连接，i节点还在，可以用来做磁盘恢复
+
+ln afile bfile
+ls -l -i afile bfile
+
+# 创建软连接可以跨文件系统
+ln -s afile bfile
+ls -li 
+
+```
+
+
+
+
+
+磁盘配额的使用
+磁盘的分区与挂载
+交换分区（虚拟内存）的查看与创建
+
+软件RAID的使用
+逻辑卷管理
+
+系统综合状态查看
 
 
 
