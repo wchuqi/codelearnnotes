@@ -1922,8 +1922,73 @@ ls -li
 
 
 
-磁盘配额的使用
-磁盘的分区与挂载
+## 磁盘配额的使用
+
+```shell
+用户磁盘配额
+
+# xfs文件系统的用户磁盘配额
+quota
+
+mkfs.xfs -f /dev/sdb1
+mkdir /mnt/disk1
+mount -o uquota,gquota /dev/sdb1 /mnt/disk1
+
+chmod 1777 /mnt/disk1
+xfs_quota -x -c 'report -ugibh' /mnt/disk1
+xfs_quota -x -c 'limit -u isoft=5 ihard=10 user1' /mnt/disk1
+```
+
+
+
+## 内存配额限制 cgroup
+
+//todo
+
+
+
+## 磁盘的分区与挂载
+
+```shell
+# 常用命令
+fdisk
+mkfs
+parted
+mount
+
+# 常见配置文件
+/etc/fstab
+```
+
+
+
+```shell
+fdisk /dev/vdc
+m
+n
+p
+1
+d
+w
+
+fdisk -l
+
+# 格式化
+mkfs.ext4 /dev/vdc1
+
+mkdir /mnt/aaa
+mount /dev/vdc1 /mnt/aaa
+
+vim /etc/fstab
+/dev/vdc1 /mnt/aaa ext4 defaults 0 0
+
+# 对超过2T的磁盘进行分区，需要使用parted
+```
+
+
+
+
+
 交换分区（虚拟内存）的查看与创建
 
 软件RAID的使用
