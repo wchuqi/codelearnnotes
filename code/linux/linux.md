@@ -1989,12 +1989,177 @@ vim /etc/fstab
 
 
 
-交换分区（虚拟内存）的查看与创建
+## 交换分区（虚拟内存）的查看与创建
 
-软件RAID的使用
-逻辑卷管理
+```shell
+# 增加交换分区的大小
+mkswap
+swapon
 
-系统综合状态查看
+# 使用文件制作交换分区
+dd if=/dev/zero bs=4M count=1024 of=/swapfile
+```
+
+
+
+```shell
+# 使用本次磁盘来扩展swap
+# 新增分区
+ls /dev/vdc1
+mkswap /dev/vdc1
+swapon /dev/vdc1
+swapoff /dev/vdc1
+
+# 使用空文件来扩展swap
+dd if=/dev/zero bs=4M count=1024 of=/swapfile
+chmod 600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+
+# 将swap写入到配置文件
+vim /etc/fstab
+/dev/vdc1 swap swap defaults 0 0
+/swapfile swap swap defaults 0 0
+```
+
+
+
+## RAID与软件RAID技术
+
+**磁盘阵列**
+
+将多块硬盘组合起来
+
+
+
+```shell
+# RAID的常见级别及含义
+RAID 0 # Striping 条带方式，提高单盘吞吐率
+RAID 1 # mirroring 镜像方式，提高可靠性
+RAID 5 # 有奇偶校验
+RAID 10 # 是RAID 1 与 RAID 0 的结合
+
+```
+
+```shell
+一般使用RAID控制卡来做RAID，不推荐使用软件做RAID的方式
+
+# 软件RAID的使用
+yum install mdadm
+
+mdadm -C /dev/md0 -a yes -l1 -n2 /dev/vdc1 /dev/vdc2 /dev/vdc3
+或者
+mdadm -C /dev/md0 -a yes -l1 -n2 /dev/vd[b,c]1
+
+/dev/md0相当于是上层结构，分别对应下面的分区，如果分区直接做了挂载，raid就失效了。
+
+# 查看
+mdadm -D /dev/md0
+
+# 写入配置文件
+echo DEVICE /dev/vdc1 /dev/vdc2 /dev/vdc3 >> /etc/mdadm.conf
+echo DEVICE /dev/vd[b,c]1 >> /etc/mdadm.conf
+mdadm -Evs >> /etc/mdadm.conf
+
+# 格式化
+mkfs.xfs /dev/md0
+# 挂载
+mount /opt /dev/md0
+
+# 停掉raid
+mdadm --stop /dev/md0
+```
+
+## 逻辑卷管理
+
+逻辑卷和文件系统的关系
+
+为Linux创建逻辑卷
+
+动态扩容逻辑卷
+
+
+
+```shell
+# 创建物理卷
+pvcreate /dev/vdc1 /dev/vdd1 /dev/vde1
+或者
+pvcreate /dev/vd[c,d,e]1 # 通配符
+Physical volume "/dev/vdd1" successfully created
+
+# 查看物理卷
+pvs
+
+# 创建卷组
+vgcreate vg1 /dev/vdc1 /dev/vdd1
+Volume group "vg1" successfully created
+# 查看卷组
+vgs
+
+# 创建逻辑卷组
+lvcreate -L 100M -n lv1 vg1
+Logical volume "lv1" created
+
+# 查看逻辑卷组
+lvs
+
+mkdir /mnt/test
+mkfs.xfs /dev/vg1/lv1
+# 挂载
+mount /dev/vg1/lv1 /mnt/test
+```
+
+```shell
+vgextend vg1 /dev/vdf1
+Volume group "vg1" successfully extended
+
+lvextend -L +100G /dev/vg1/lv1
+Logical volume vg1/lv1 successfully resized
+
+xfs_growfs /dev/vg1/lv1
+```
+
+
+
+**缩容有危险，不建议**
+
+
+
+## 系统综合状态查看
+
+```shell
+# 使用sar命令查看系统综合状态
+
+# 使用第三方命令查看网络流量
+yum install epel-release
+yum install iftop
+iftop -P
+```
+
+```shell
+# 每隔1s查看cpu使用情况，采集10次
+sar -u 1 10
+
+# 每隔1s查看内存使用情况，采集10次
+sar -r 1 10
+
+# 每隔1s查看io使用情况，采集10次
+sar -b 1 10
+
+# 每隔1s查看磁盘使用情况，采集10次
+sar -d 1 10
+
+# 每隔1s查看进程使用情况，采集10次
+sar -q 1 10
+```
+
+```shell
+# 查看网络流量
+iftop -P
+
+```
+
+
 
 
 
@@ -2002,7 +2167,128 @@ vim /etc/fstab
 
 
 
-# shell脚本
+# shell
+
+## 什么是shell
+
+shell是命令解释器，用于解释用户对操作系统的操作
+
+```shell
+# Shel有很多
+cat /etc/shells
+
+Centos7默认使用的Shell是bash
+```
+
+## linux启动过程
+
+分为6个步骤
+
+`BIOS -> MBR -> BootLoader(grub) -> kernel -> systemd -> 系统初始化 -> shell`
+
+```shell
+dd if=/dev/vda of=mbr.bin bs=446 count=1
+hexdump -C mbr.bin
+
+dd if=/dev/vda of=mbr2.bin bs=512 count=1
+hexdump -C mbr2.bin | more
+
+
+uname -a
+# 查看内核
+uname -r
+
+file /tmp/1.log
+
+```
+
+
+
+## Shell脚本
+
+**UNIX的哲学：一条命令只做一件事**
+
+为了组合命令和多次执行，使用脚本文件来保存需要执行的命令
+
+赋予该文件执行权限（`chmod u+rx filename`）
+
+```shell
+# 标准的shell脚本要包含哪些元素
+
+#!/bin/bash # Sha-Bang
+命令
+#号开头的注释
+
+chmod u+rx filename # 可执行权限
+
+# 执行命令
+bash ./filename.sh
+./filename.sh  # 默认用#!指定的解释器执行
+
+# 下面这2种方式对当前环境是有影响的，上面这2种没有影响
+source ./filename.sh
+.filename.sh
+```
+
+
+
+## 内建命令和外部命令
+
+内建命令不需要创建子进程
+
+内建命令对当前Shell生效
+
+
+
+## 管道和重定向
+
+管道与管道符
+
+子进程与子shell
+
+重定向符号
+
+```shell
+管道和信号一样，也是进程通信的方式之一
+匿名管道（管道符）是Shell编程经常用到的通信工具
+管道符是“|”，将前一个命令执行的结果传递给后面的命令
+ps | cat
+echo 123 | ps
+```
+
+```shell
+一个进程默认会打开标准输入、标准输出、错误输出三个文件描述符
+
+输入重定向符号 "<"
+read var < /path/to/a/file
+
+输出重定向符号 ">" ">>" "2>" "&>"
+echo 123 >/path/to/a/file
+
+输入和输出重定向组合使用
+cat >/path/to/a/file <<EOF
+I am $USER
+EOF
+
+wc -l
+wc -l < /etc/passwd
+
+read var
+123
+echo $var
+123
+
+vim 1.txt
+123
+:wq
+
+read var < 1.txt
+echo $var
+
+
+```
+
+
 
 
 
