@@ -2812,14 +2812,234 @@ esac
 ## 循环
 
 使用for循环遍历命令的执行结果
+
+```shell
+# for循环的语法
+
+for 参数 in 列表
+do 执行的命令
+done 封闭一个循环
+
+使用反引号或$()方式执行命令，命令的结果当作列表进行处理
+
+列表中包含多个变量，变量用空格分隔
+对文本处理，要使用文本查看命令取出文本内容，默认逐行处理，如果文本出现空格会当做多行处理
+```
+
+```shell
+for i in {1..9}
+do
+	echo $i
+done
+1
+2
+3
+4
+...
+
+for i in {1..9}; do echo $i; done
+
+ls a.log
+a.log
+
+basename a.log
+a.log
+basename a.log .log
+a
+
+touch a.log b.log c.log
+for filename in `ls *.log`
+do 
+	mv $filename $(basename $filename .log).txt
+done
+```
+
+
+
 使用for循环遍历变量和文件的内容
 
 C语言风格的for命令
+
+```shell
+for ((变量初始化; 循环判断条件; 变量变化))
+do
+     循环执行的命令
+done
+```
+
+```shell
+for ((i=1; i<10; i++))
+do
+	echo $i
+done
+
+
+```
+
+
+
 while循环
+
+```shell
+while test测试是否成立
+do
+    命令
+done
+```
+
+
+
 死循环
+
+```shell
+a=1
+while [ $a -lt 10 ]
+do
+	echo $a
+done
+
+while [ $a -lt 10 ]; do ((a++)); echo $a; done
+
+while :
+do 
+	echo aaa
+done
+```
+
+
+
+
+
 until循环
+
+```shell
+until循环与while循环相反，循环测试为假时，执行循环，为真时循环停止
+```
+
+
+
 break和continue语句
+
+```shell
+循环和循环可以嵌套
+循环中可以嵌套判断，反过来也可以嵌套
+循环可以使用break和continue语句在循环中退出
+```
+
+```shell
+for name in /etc/profile.d/*.sh
+do
+	echo $name
+done
+
+for name in /etc/profile.d/*.sh
+do
+	if [ -x $name ]; then
+		. $name
+	fi
+done
+
+for i in {1..9}
+do 
+	if [ $i -eq 5 ]; then
+		break
+		# continue
+	fi
+	echo $i
+done
+```
+
+
+
 使用循环对命令行参数的处理
+
+```shell
+命令行参数可以使用 $1 $2 .. ${10} $n 进行读取
+$0 代表脚本名称
+$* 和 $@ 代表所有位置参数
+$# 代表位置参数的数量
+```
+
+```shell
+#!/bin/bash
+
+for i in $*
+do
+	if [ "$i" = "help" ]; then
+		echo $i
+	fi
+done
+
+while [ $# -ge 1 ]
+do
+	if [ "$i" = "help" ]; then
+		echo $i
+	fi
+	shift
+done
+```
+
+## 函数
+
+### 自定义函数
+
+```shell
+函数用于“包含”重复使用的命令集合
+
+# 自定义函数
+function fname() {
+	命令
+}
+
+# 函数的执行
+fname
+
+# 函数作用范围的变量
+local 变量名
+
+# 函数的参数
+$1 $2 $3 ... $n
+```
+
+```shell
+checkpid() {
+	local i
+	for i in $*; do
+		[ -d "/proc/$i" ] && return 0
+	done
+	return 1
+}
+```
+
+
+
+### 系统函数库
+
+```shell
+系统自建了函数库，可以在脚本中引用
+/etc/init.d/functions
+
+自建函数库
+使用 source 函数脚本文件 “导入”函数
+```
+
+
+
+```shell
+vim /etc/init.d/functions
+source /etc/init.d/functions
+
+echo_success
+
+vim /etc/profile
+vim .bashrc
+vim .bash_profile
+
+```
+
+
+
+
 
 
 
